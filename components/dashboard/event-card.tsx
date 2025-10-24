@@ -22,7 +22,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
   return (
     <button
       onClick={onClick}
-      className="group h-full text-left bg-card rounded-xl border border-border hover:border-primary/50 overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+      className="group h-full w-full max-w-120 max text-left bg-card rounded-xl border border-border hover:border-primary/50 overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden bg-muted">
