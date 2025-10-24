@@ -1,26 +1,41 @@
-"use client"
+'use client'
 
-import { useState } from "react"
-import AuthPage from "@/components/auth/auth-page"
-import Dashboard from "@/components/dashboard/dashboard"
+import { useAuth } from '@/lib/auth-context'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
-export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userRole, setUserRole] = useState<"user" | "admin">("user")
+export default function Home () {
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
+  console.log(
+    'Home component rendered. isAuthenticated:',
+    isAuthenticated,
+    'isLoading:',
+    isLoading
+  )
+useEffect(() => {
+  if (isLoading) return
 
-  const handleLogin = (role: "user" | "admin") => {
-    setIsAuthenticated(true)
-    setUserRole(role)
-  }
+  console.log('Redirecting in 1 second...')
+  setTimeout(() => {
+    if (isAuthenticated) {
+      router.replace('/dashboard')
+    } else {
+      router.replace('/auth/login')
+    }
+  }, 1000)
+}, [isAuthenticated, isLoading, router])
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setUserRole("user")
-  }
-
-  if (!isAuthenticated) {
-    return <AuthPage onLogin={handleLogin} />
-  }
-
-  return <Dashboard userRole={userRole} onLogout={handleLogout} />
+  return (
+    <div className='flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-400'>
+      <div className='text-center'>
+        <div className='inline-block'>
+          <div className='w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin'></div>
+        </div>
+        <p className='mt-4 text-white text-lg font-medium'>
+          Loading CampusPulse...
+        </p>
+      </div>
+    </div>
+  )
 }

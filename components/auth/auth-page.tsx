@@ -4,12 +4,12 @@ import { useState } from "react"
 import LoginForm from "./login-form"
 import SignupForm from "./signup-form"
 
-interface AuthPageProps {
-  onLogin: (role: "user" | "admin") => void
-}
-
-export default function AuthPage({ onLogin }: AuthPageProps) {
+export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
+
+  const handleSignup = () => {
+    setIsLogin(true)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
@@ -34,7 +34,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
 
         {/* Auth Forms */}
         <div className="bg-card rounded-2xl shadow-2xl border border-border/50 backdrop-blur-sm p-8 animate-slide-up">
-          {isLogin ? <LoginForm onLogin={onLogin} /> : <SignupForm onSignup={() => setIsLogin(true)} />}
+          {isLogin ? <LoginForm /> : <SignupForm onSignup={handleSignup} />}
 
           {/* Toggle between login and signup */}
           <div className="mt-6 text-center">

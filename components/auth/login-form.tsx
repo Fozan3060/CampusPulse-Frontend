@@ -1,33 +1,37 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
 
-interface LoginFormProps {
-  onLogin: (role: "user" | "admin") => void
-}
-
-export default function LoginForm({ onLogin }: LoginFormProps) {
+export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState<"user" | "admin">("user")
-  const [isLoading, setIsLoading] = useState(false)
+  const { login, isLoading, error, clearError } = useAuth()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    clearError()
 
-    // Simulate API call
-    setTimeout(() => {
-      onLogin(role)
-      setIsLoading(false)
-    }, 500)
+    try {
+      const success = await login(email, password)
+      if (success) {
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      console.error("[v0] Login error:", err)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-2xl font-bold mb-6">Welcome back</h2>
+
+      {error && (
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 text-sm">{error}</div>
+      )}
 
       <div>
         <label className="block text-sm font-medium mb-2">Email</label>
@@ -38,6 +42,7 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
           placeholder="you@campus.edu"
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -50,35 +55,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
           placeholder="••••••••"
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           required
+          disabled={isLoading}
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-3">Login as</label>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setRole("user")}
-            className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-              role === "user"
-                ? "bg-primary text-primary-foreground shadow-lg"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            }`}
-          >
-            Student
-          </button>
-          <button
-            type="button"
-            onClick={() => setRole("admin")}
-            className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-              role === "admin"
-                ? "bg-secondary text-secondary-foreground shadow-lg"
-                : "bg-muted text-foreground hover:bg-muted/80"
-            }`}
-          >
-            Admin
-          </button>
-        </div>
       </div>
 
       <button

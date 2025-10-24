@@ -1,28 +1,18 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { adminApi } from "@/lib/api"
 
 interface EventFormProps {
-  onSubmit: (event: {
-    title: string
-    date: string
-    time: string
-    location: string
-    organizer: string
-    description: string
-    image: string
-    deadline: string
-    category: string
-  }) => void
+  onSuccess?: () => void
 }
 
 const CATEGORIES = ["Technology", "Entertainment", "Sports", "Arts", "Business", "Academic"]
 
-export default function EventForm({ onSubmit }: EventFormProps) {
+export default function EventForm({ onSuccess }: EventFormProps) {
   const [formData, setFormData] = useState({
-    title: "",
+    eventName: "",
     date: "",
     time: "",
     location: "",
@@ -32,43 +22,74 @@ export default function EventForm({ onSubmit }: EventFormProps) {
     deadline: "",
     category: "Technology",
   })
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
-    setFormData({
-      title: "",
-      date: "",
-      time: "",
-      location: "",
-      organizer: "",
-      description: "",
-      image: "",
-      deadline: "",
-      category: "Technology",
-    })
+    setIsLoading(true)
+    setError(null)
+    setSuccess(false)
+
+    try {
+      const response = await adminApi.addEvent(formData)
+      if (response.success) {
+        setSuccess(true)
+        setFormData({
+          eventName: "",
+          date: "",
+          time: "",
+          location: "",
+          organizer: "",
+          description: "",
+          image: "",
+          deadline: "",
+          category: "Technology",
+        })
+        onSuccess?.()
+        setTimeout(() => setSuccess(false), 3000)
+      } else {
+        setError(response.error || "Failed to create event")
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create event")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-xl border border-border p-8 space-y-6">
       <h2 className="text-2xl font-bold">Create New Event</h2>
 
+      {error && (
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 text-sm">{error}</div>
+      )}
+
+      {success && (
+        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 text-sm">
+          Event created successfully!
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium mb-2">Event Title</label>
           <input
             type="text"
-            name="title"
-            value={formData.title}
+            name="eventName"
+            value={formData.eventName}
             onChange={handleChange}
             placeholder="e.g., Tech Summit 2025"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -79,6 +100,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             value={formData.category}
             onChange={handleChange}
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            disabled={isLoading}
           >
             {CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
@@ -98,6 +120,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             placeholder="e.g., March 15, 2025"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -111,6 +134,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             placeholder="e.g., 10:00 AM"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -124,6 +148,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             placeholder="e.g., Main Auditorium"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -137,6 +162,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             placeholder="e.g., Tech Club"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -150,6 +176,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             placeholder="e.g., March 10, 2025"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
 
@@ -163,6 +190,7 @@ export default function EventForm({ onSubmit }: EventFormProps) {
             placeholder="e.g., /placeholder.svg?height=300&width=400"
             className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             required
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -177,14 +205,16 @@ export default function EventForm({ onSubmit }: EventFormProps) {
           rows={4}
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
           required
+          disabled={isLoading}
         />
       </div>
 
       <button
         type="submit"
-        className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-secondary to-accent text-secondary-foreground font-semibold hover:shadow-lg transition-all"
+        disabled={isLoading}
+        className="w-full py-3 px-6 rounded-lg bg-gradient-to-r from-secondary to-accent text-secondary-foreground font-semibold hover:shadow-lg transition-all disabled:opacity-50"
       >
-        Create Event
+        {isLoading ? "Creating Event..." : "Create Event"}
       </button>
     </form>
   )

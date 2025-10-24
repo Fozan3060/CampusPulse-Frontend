@@ -1,21 +1,21 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 
-interface SignupFormProps {
-  onSignup: () => void
-}
-
-export default function SignupForm({ onSignup }: SignupFormProps) {
+export default function SignupForm() {
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
   })
-  const [isLoading, setIsLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
+  const { register, isLoading, error, clearError } = useAuth()
+  const router = useRouter()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -24,33 +24,52 @@ export default function SignupForm({ onSignup }: SignupFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    clearError()
+    setSuccessMessage("")
+
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match")
       return
     }
 
-    setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      onSignup()
-      setIsLoading(false)
-    }, 500)
+    try {
+      const success = await register(formData.username, formData.email, formData.password)
+      if (success) {
+        setSuccessMessage("Account created successfully! Redirecting to login...")
+        setTimeout(() => {
+          router.push("/auth/login")
+        }, 2000)
+      }
+    } catch (err) {
+      console.error("Signup error:", err)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-2xl font-bold mb-6">Create your account</h2>
 
+      {error && (
+        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 text-sm">{error}</div>
+      )}
+
+      {successMessage && (
+        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-600 text-sm">
+          {successMessage}
+        </div>
+      )}
+
       <div>
-        <label className="block text-sm font-medium mb-2">Full Name</label>
+        <label className="block text-sm font-medium mb-2">Username</label>
         <input
           type="text"
-          name="name"
-          value={formData.name}
+          name="username"
+          value={formData.username}
           onChange={handleChange}
-          placeholder="John Doe"
+          placeholder="johndoe"
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -64,6 +83,7 @@ export default function SignupForm({ onSignup }: SignupFormProps) {
           placeholder="you@campus.edu"
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -77,6 +97,7 @@ export default function SignupForm({ onSignup }: SignupFormProps) {
           placeholder="••••••••"
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -90,6 +111,7 @@ export default function SignupForm({ onSignup }: SignupFormProps) {
           placeholder="••••••••"
           className="w-full px-4 py-3 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           required
+          disabled={isLoading}
         />
       </div>
 
@@ -100,6 +122,13 @@ export default function SignupForm({ onSignup }: SignupFormProps) {
       >
         {isLoading ? "Creating account..." : "Sign up"}
       </button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link href="/auth/login" className="text-primary hover:underline font-semibold">
+          Login here
+        </Link>
+      </p>
     </form>
   )
 }

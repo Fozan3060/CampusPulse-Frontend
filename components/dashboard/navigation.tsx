@@ -1,16 +1,38 @@
 "use client"
 
 import { useState } from "react"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter, usePathname } from "next/navigation"
 
-interface NavigationProps {
-  userRole: "user" | "admin"
-  currentPage: "events" | "admin" | "feedback"
-  onPageChange: (page: "events" | "admin" | "feedback") => void
-  onLogout: () => void
-}
-
-export default function Navigation({ userRole, currentPage, onPageChange, onLogout }: NavigationProps) {
+export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { userRole, logout } = useAuth()
+  const router = useRouter()
+  const pathname = usePathname()
+
+  const getCurrentPage = () => {
+    if (pathname.includes("/admin")) return "admin"
+    if (pathname.includes("/feedback")) return "feedback"
+    return "events"
+  }
+
+  const currentPage = getCurrentPage()
+
+  const handleNavigation = (page: string) => {
+    if (page === "events") {
+      router.push("/dashboard/events")
+    } else if (page === "admin") {
+      router.push("/dashboard/admin")
+    } else if (page === "feedback") {
+      router.push("/dashboard/feedback")
+    }
+    setIsMobileMenuOpen(false)
+  }
+
+  const handleLogout = () => {
+    logout()
+    router.push("/auth/login")
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card border-b border-border/50 backdrop-blur-md">
@@ -29,7 +51,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
             <button
-              onClick={() => onPageChange("events")}
+              onClick={() => handleNavigation("events")}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 currentPage === "events" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
               }`}
@@ -38,7 +60,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
             </button>
             {userRole === "admin" && (
               <button
-                onClick={() => onPageChange("admin")}
+                onClick={() => handleNavigation("admin")}
                 className={`px-4 py-2 rounded-lg font-medium transition-all ${
                   currentPage === "admin" ? "bg-secondary text-secondary-foreground" : "text-foreground hover:bg-muted"
                 }`}
@@ -47,7 +69,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
               </button>
             )}
             <button
-              onClick={() => onPageChange("feedback")}
+              onClick={() => handleNavigation("feedback")}
               className={`px-4 py-2 rounded-lg font-medium transition-all ${
                 currentPage === "feedback" ? "bg-accent text-accent-foreground" : "text-foreground hover:bg-muted"
               }`}
@@ -65,7 +87,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
               <span className="text-sm font-medium">{userRole === "admin" ? "Admin" : "Student"}</span>
             </div>
             <button
-              onClick={onLogout}
+              onClick={handleLogout}
               className="px-4 py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 font-medium transition-all text-sm"
             >
               Logout
@@ -87,10 +109,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
         {isMobileMenuOpen && (
           <div className="md:hidden pb-4 space-y-2">
             <button
-              onClick={() => {
-                onPageChange("events")
-                setIsMobileMenuOpen(false)
-              }}
+              onClick={() => handleNavigation("events")}
               className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-all ${
                 currentPage === "events" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
               }`}
@@ -99,10 +118,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
             </button>
             {userRole === "admin" && (
               <button
-                onClick={() => {
-                  onPageChange("admin")
-                  setIsMobileMenuOpen(false)
-                }}
+                onClick={() => handleNavigation("admin")}
                 className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-all ${
                   currentPage === "admin" ? "bg-secondary text-secondary-foreground" : "text-foreground hover:bg-muted"
                 }`}
@@ -111,10 +127,7 @@ export default function Navigation({ userRole, currentPage, onPageChange, onLogo
               </button>
             )}
             <button
-              onClick={() => {
-                onPageChange("feedback")
-                setIsMobileMenuOpen(false)
-              }}
+              onClick={() => handleNavigation("feedback")}
               className={`w-full text-left px-4 py-2 rounded-lg font-medium transition-all ${
                 currentPage === "feedback" ? "bg-accent text-accent-foreground" : "text-foreground hover:bg-muted"
               }`}
