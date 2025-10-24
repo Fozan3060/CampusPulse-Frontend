@@ -1,11 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import LoginForm from "./login-form"
 import SignupForm from "./signup-form"
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true)
+  const router = useRouter()
+
+  const handleSignup = () => {
+    setIsLogin(true)
+  }
 
   const handleSignup = () => {
     setIsLogin(true)
