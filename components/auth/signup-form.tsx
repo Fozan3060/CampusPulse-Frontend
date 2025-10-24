@@ -36,9 +36,7 @@ export default function SignupForm() {
       const success = await register(formData.username, formData.email, formData.password)
       if (success) {
         setSuccessMessage("Account created successfully! Redirecting to login...")
-        setTimeout(() => {
           router.push("/auth/login")
-        }, 2000)
       }
     } catch (err) {
       console.error("Signup error:", err)
@@ -46,7 +44,8 @@ export default function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    
+    <form  onSubmit={handleSubmit} className="space-y-4 max-w-120 m-auto bg-card rounded-2xl shadow-2xl border border-border/50 backdrop-blur-sm p-8 animate-slide-up mt-20">
       <h2 className="text-2xl font-bold mb-6">Create your account</h2>
 
       {error && (
