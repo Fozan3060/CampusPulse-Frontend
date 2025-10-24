@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import LoginForm from "./login-form"
 import SignupForm from "./signup-form"
 
@@ -10,6 +11,11 @@ interface AuthPageProps {
 
 export default function AuthPage({ onLogin }: AuthPageProps) {
   const [isLogin, setIsLogin] = useState(true)
+  const router = useRouter()
+
+  const handleSignup = () => {
+    setIsLogin(true)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted flex items-center justify-center p-4">
@@ -34,7 +40,7 @@ export default function AuthPage({ onLogin }: AuthPageProps) {
 
         {/* Auth Forms */}
         <div className="bg-card rounded-2xl shadow-2xl border border-border/50 backdrop-blur-sm p-8 animate-slide-up">
-          {isLogin ? <LoginForm onLogin={onLogin} /> : <SignupForm onSignup={() => setIsLogin(true)} />}
+          {isLogin ? <LoginForm onLogin={onLogin} /> : <SignupForm onSignup={handleSignup} />}
 
           {/* Toggle between login and signup */}
           <div className="mt-6 text-center">

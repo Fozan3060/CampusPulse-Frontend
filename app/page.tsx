@@ -1,26 +1,20 @@
 "use client"
 
-import { useState } from "react"
-import AuthPage from "@/components/auth/auth-page"
-import Dashboard from "@/components/dashboard/dashboard"
+import { useAuth } from "@/lib/auth-context"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userRole, setUserRole] = useState<"user" | "admin">("user")
+  const { isAuthenticated } = useAuth()
+  const router = useRouter()
 
-  const handleLogin = (role: "user" | "admin") => {
-    setIsAuthenticated(true)
-    setUserRole(role)
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard")
+    } else {
+      router.push("/auth/login")
+    }
+  }, [isAuthenticated, router])
 
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    setUserRole("user")
-  }
-
-  if (!isAuthenticated) {
-    return <AuthPage onLogin={handleLogin} />
-  }
-
-  return <Dashboard userRole={userRole} onLogout={handleLogout} />
+  return null
 }
