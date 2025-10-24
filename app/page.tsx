@@ -7,16 +7,10 @@ import { useEffect } from 'react'
 export default function Home () {
   const { isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
-  console.log(
-    'Home component rendered. isAuthenticated:',
-    isAuthenticated,
-    'isLoading:',
-    isLoading
-  )
+
 useEffect(() => {
   if (isLoading) return
 
-  console.log('Redirecting in 1 second...')
   setTimeout(() => {
     if (isAuthenticated) {
       router.replace('/dashboard')
