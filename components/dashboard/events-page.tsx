@@ -149,7 +149,7 @@ export default function EventsPage() {
       </div>
 
       {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 mx-auto md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEvents.map((event, index) => (
           <div key={event.id} style={{ animationDelay: `${index * 50}ms` }} className="animate-slide-up flex justify-center">
             <EventCard event={event} onClick={() => setSelectedEvent(event)} />

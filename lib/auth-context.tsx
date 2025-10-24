@@ -43,26 +43,18 @@ export function AuthProvider({ children }: { children: ReactNode  }) {
 
     const initializeAuth = async () => {
       try {
-        console.log('[v0] Initializing auth...')
+      
         const refreshToken = localStorage.getItem('refreshToken')
         const accessToken = localStorage.getItem('accessToken')
 
-        console.log(
-          '[v0] Tokens found - refreshToken:',
-          !!refreshToken,
-          'accessToken:',
-          !!accessToken
-        )
+      
 
         if (refreshToken) {
-          console.log('[v0] Attempting to refresh token and fetch profile...')
           const [refreshResponse, profileResponse] = await Promise.all([
             authApi.refreshToken(),
             authApi.getUserProfile()
           ])
 
-          console.log('[v0] Refresh response:', refreshResponse)
-          console.log('[v0] Profile response:', profileResponse)
 
           if (refreshResponse.success && refreshResponse.data) {
             const { accessToken: newAccessToken } = refreshResponse.data
@@ -76,23 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode  }) {
                 username: profileData.username,
                 role: (profileData.role as 'user' | 'admin') || 'user'
               })
-              console.log('[v0] User authenticated with profile data:', profileData)
             } else {
               const userData = extractUserFromToken(newAccessToken)
               if (userData) setUser(userData)
-              console.log('[v0] User authenticated via token extraction')
             }
 
             setIsAuthenticated(true)
           } else {
-            console.log('[v0] Refresh failed:', refreshResponse.error)
             clearTokens()
             setIsAuthenticated(false)
           }
         } else if (accessToken) {
-          console.log('[v0] Using existing access token, fetching profile...')
           const profileResponse = await authApi.getUserProfile()
-          console.log('[v0] Profile response:', profileResponse)
 
           if (profileResponse.success && profileResponse.data) {
             const profileData = profileResponse.data
@@ -103,21 +90,17 @@ export function AuthProvider({ children }: { children: ReactNode  }) {
               role: (profileData.role as 'user' | 'admin') || 'user'
             })
             setIsAuthenticated(true)
-            console.log('[v0] User authenticated with profile data')
           } else {
             const userData = extractUserFromToken(accessToken)
             if (userData) {
               setUser(userData)
               setIsAuthenticated(true)
-              console.log('[v0] User authenticated via token extraction')
             }
           }
         } else {
-          console.log('[v0] No tokens found, user not authenticated')
           setIsAuthenticated(false)
         }
       } catch (err) {
-        console.error('[v0] Error initializing auth:', err)
         clearTokens()
         setIsAuthenticated(false)
       } finally {
@@ -190,7 +173,6 @@ export function AuthProvider({ children }: { children: ReactNode  }) {
     try {
       await authApi.logout()
     } catch (err) {
-      console.error('Logout error:', err)
     } finally {
       clearTokens()
       setUser(null)
@@ -204,7 +186,6 @@ export function AuthProvider({ children }: { children: ReactNode  }) {
   // Only log on client
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      console.log('[v0] AuthProvider rendered. isAuthenticated:', isAuthenticated)
     }
   }, [isAuthenticated])
 
